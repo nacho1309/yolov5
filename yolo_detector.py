@@ -48,7 +48,17 @@ class YoloV5Detector():
         self.augment = augment
         if self.device.type != 'cpu':
             self.model(torch.zeros(1, 3, self.imgsz, self.imgsz).to(self.device).type_as(next(self.model.parameters())))  # run once
-            
+          
+    def __make_objects_from_detections(self, pred):
+        res = []
+        for i in range(len(pred["boxes"])):
+            xyxy = pred["boxes"][i]
+            xyxy = [int(item) for item in xyxy]
+            cls = pred["classes"][i]
+            score = pred["scores"][i]
+            res.append({"bbox":xyxy, "class":cls, "score":float(score)})
+        return res    
+        
     def detect_image(self, img):
         original_frame = img
         # Padded resize
@@ -81,13 +91,14 @@ class YoloV5Detector():
         classes = [self.names[elem] for elem in classes]
         output = {"boxes": pred_array[:,:4],
                     "classes": classes, "scores": scores}
-        return output
+        return self.__make_objects_from_detections(output) 
 
-    def draw_img(self, pred, img):
-        for i in range(len(pred["boxes"])):
-            xyxy = pred["boxes"][i]
-            cls = pred["classes"][i]
-            score = pred["scores"][i]
+    def draw_img(self, objs, img):
+        for pred in objs:
+            xyxy = pred["bbox"]
+            cls = pred["class"]
+            score = pred["score"]
             label = '%s %.2f' % (cls, score)
             cls_index = [i for i, elem in enumerate(self.names) if elem == cls][0]
             plot_one_box(xyxy, img, label=label, color=self.colors[int(cls_index)], line_thickness=3)
+            
