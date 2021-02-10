@@ -28,7 +28,7 @@ class YoloV5Detector():
             d = yaml.load(f, Loader=yaml.FullLoader)  # dict
             return d['names']
     
-    def __init__(self, weights='yolov5s.pt', img_size=640, conf_thres=0.25, iou_thres=0.45, agnostic_nms=True, device="", 
+    def __init__(self, weights='yolov5x.pt', img_size=640, conf_thres=0.25, iou_thres=0.45, agnostic_nms=True, device="", 
                     classes_file = "models/yolov5/coco.yaml", augment=True):
         # Initialize
         set_logging()
@@ -101,4 +101,3 @@ class YoloV5Detector():
             label = '%s %.2f' % (cls, score)
             cls_index = [i for i, elem in enumerate(self.names) if elem == cls][0]
             plot_one_box(xyxy, img, label=label, color=self.colors[int(cls_index)], line_thickness=3)
-            
